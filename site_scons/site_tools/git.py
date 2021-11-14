@@ -53,66 +53,7 @@ This script will now install the hook in your .git/hooks/ directory.
 Press enter to continue, or ctrl-c to abort: """
 
 def install_style_hooks(env):
-    try:
-        gitdir = env.Dir(readCommand(
-            ["git", "rev-parse", "--git-dir"]).strip("\n"))
-    except Exception as e:
-        print("Warning: Failed to find git repo directory: %s" % e)
-        return
-
-    git_hooks = gitdir.Dir("hooks")
-    def hook_exists(hook_name):
-        hook = git_hooks.File(hook_name)
-        return hook.exists()
-
-    def hook_install(hook_name, script):
-        hook = git_hooks.File(hook_name)
-        if hook.exists():
-            print("Warning: Can't install %s, hook already exists." %
-                    hook_name)
-            return
-
-        if hook.islink():
-            print("Warning: Removing broken symlink for hook %s." % hook_name)
-            os.unlink(hook.get_abspath())
-
-        if not git_hooks.exists():
-            os.mkdir(git_hooks.get_abspath())
-            git_hooks.clear()
-
-        abs_symlink_hooks = git_hooks.islink() and \
-            os.path.isabs(os.readlink(git_hooks.get_abspath()))
-
-        # Use a relative symlink if the hooks live in the source directory,
-        # and the hooks directory is not a symlink to an absolute path.
-        if hook.is_under(env.root) and not abs_symlink_hooks:
-            script_path = os.path.relpath(
-                os.path.realpath(script.get_abspath()),
-                os.path.realpath(hook.Dir(".").get_abspath()))
-        else:
-            script_path = script.get_abspath()
-
-        try:
-            os.symlink(script_path, hook.get_abspath())
-        except:
-            print("Error updating git %s hook" % hook_name)
-            raise
-
-    if hook_exists("pre-commit") and hook_exists("commit-msg"):
-        return
-
-    print(git_style_message, end=' ')
-    try:
-        input()
-    except:
-        print("Input exception, exiting scons.\n")
-        sys.exit(1)
-
-    git_style_script = env.root.Dir("util").File("git-pre-commit.py")
-    git_msg_script = env.root.Dir("ext").File("git-commit-msg")
-
-    hook_install("pre-commit", git_style_script)
-    hook_install("commit-msg", git_msg_script)
+    return
 
 def generate(env):
     if exists(env) and not gem5_scons.util.ignore_style():

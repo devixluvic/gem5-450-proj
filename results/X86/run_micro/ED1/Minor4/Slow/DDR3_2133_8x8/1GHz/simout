@@ -1,0 +1,14 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.1.0.2
+gem5 compiled Nov 27 2021 21:20:05
+gem5 started Nov 27 2021 21:54:25
+gem5 executing on bc645a2a1e1c, pid 13128
+command line: /workspaces/gem5/build/X86/gem5.opt -re --outdir=/workspaces/gem5/results/X86/run_micro/ED1/Minor4/Slow/DDR3_2133_8x8/1GHz gem5-config/run_micro.py Minor4 Slow microbenchmark/ED1/bench.X86 DDR3_2133_8x8 --clock=1GHz
+
+1GHz CPU speed and DRAM = DDR3_2133_8x8
+system.py: init L2 cache with size 1MB
+Global frequency set at 1000000000000 ticks per second
+Exit Eventexiting with last active thread context
+Dump stats at the end of the ROI!

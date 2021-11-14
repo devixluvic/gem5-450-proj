@@ -1,0 +1,18 @@
+warn: l1_to_l2.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: l1_to_l2.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: l1_to_l2.master is deprecated. `master` is now called `mem_side_ports`
+warn: membus.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: membus.master is deprecated. `master` is now called `mem_side_ports`
+warn: membus.master is deprecated. `master` is now called `mem_side_ports`
+warn: membus.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: interrupts.int_master is deprecated. `int_master` is now called `int_requestor`
+warn: membus.master is deprecated. `master` is now called `mem_side_ports`
+warn: interrupts.int_slave is deprecated. `int_slave` is now called `int_responder`
+warn: membus.slave is deprecated. `slave` is now called `cpu_side_ports`
+warn: DRAM device capacity (8192 Mbytes) does not match the address range assigned (2048 Mbytes)
+0: system.remote_gdb: listening for remote gdb on port 7002
+info: Entering event queue @ 0.  Starting simulation...
+info: Increasing stack size by one page.
+warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
+      Returning '/workspaces/gem5/microbenchmark/ED1/bench.X86'
+warn: ignoring syscall mprotect(...)
