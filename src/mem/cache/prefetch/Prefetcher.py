@@ -451,6 +451,43 @@ class SBOOEPrefetcher(QueuedPrefetcher):
     score_threshold_pct = Param.Percent(25, "Min. threshold to issue a \
         prefetch. The value is the percentage of sandbox entries to use")
 
+class SMSPrefetcher(QueuedPrefetcher):
+    type = "SMSPrefetcher"
+    cxx_class = "Prefetcher::SMS"
+    cxx_header = "mem/cache/prefetch/spatio_memory_stream.hh"
+
+    spatial_region_size = Param.MemorySize("2kB",
+        "Memory covered by a hot zone")
+    active_generation_table_entries = Param.MemorySize("64",
+        "Number of entries in the active generation table")
+    active_generation_table_assoc = Param.Unsigned(64,
+        "Associativity of the active generation table")
+    active_generation_table_indexing_policy = Param.BaseIndexingPolicy(
+        SetAssociative(entry_size = 1,
+            assoc = Parent.active_generation_table_assoc,
+            size = Parent.active_generation_table_entries),
+        "Indexing policy of the active generation table")
+    active_generation_table_replacement_policy = Param.BaseReplacementPolicy(
+        LRURP(), "Replacement policy of the active generation table")
+
+    pattern_sequence_table_entries = Param.MemorySize("16384",
+        "Number of entries in the pattern sequence table")
+    pattern_sequence_table_assoc = Param.Unsigned(16384,
+        "Associativity of the pattern sequence table")
+    pattern_sequence_table_indexing_policy = Param.BaseIndexingPolicy(
+        SetAssociative(entry_size = 1,
+            assoc = Parent.pattern_sequence_table_assoc,
+            size = Parent.pattern_sequence_table_entries),
+        "Indexing policy of the pattern sequence table")
+    pattern_sequence_table_replacement_policy = Param.BaseReplacementPolicy(
+        LRURP(), "Replacement policy of the pattern sequence table")
+
+    #region_miss_order_buffer_entries = Param.Unsigned(131072,
+        #"Number of entries of the Region Miss Order Buffer")
+    #reconstruction_entries = Param.Unsigned(256,
+        #"Number of reconstruction entries")
+
+
 class STeMSPrefetcher(QueuedPrefetcher):
     type = "STeMSPrefetcher"
     cxx_class = "Prefetcher::STeMS"

@@ -64,6 +64,7 @@ class L1Cache(Cache):
     tgts_per_mshr = 20
     def __init__(self,results = None):
         super(L1Cache, self).__init__()
+        prefetcher = SMSPrefetcher()
         pass
 
     def connectBus(self, bus):
