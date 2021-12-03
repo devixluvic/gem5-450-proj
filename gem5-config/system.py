@@ -62,9 +62,11 @@ class L1Cache(Cache):
     response_latency = 1
     mshrs = 16
     tgts_per_mshr = 20
+    prefetcher = STeMSPrefetcher()
+    
     def __init__(self,results = None):
         super(L1Cache, self).__init__()
-        prefetcher = SMSPrefetcher()
+        
         pass
 
     def connectBus(self, bus):

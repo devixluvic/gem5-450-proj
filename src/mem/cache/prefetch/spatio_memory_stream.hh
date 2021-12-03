@@ -59,7 +59,7 @@ class SMS : public Queued
     /** log_2 of the spatial region size */
     const size_t spatialRegionSizeBits;
     /** Number of reconstruction entries */
-    const unsigned int reconstructionEntries;
+    //const unsigned int reconstructionEntries;
 
     /**
      * Entry data type for the Active Generation Table (AGT) and the Pattern

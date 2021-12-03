@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mem/cache/prefetch/spatio_temporal_memory_streaming.hh"
+#include "mem/cache/prefetch/spatio_memory_stream.hh"
 
 #include "debug/HWPrefetch.hh"
 #include "mem/cache/prefetch/associative_set_impl.hh"
@@ -37,7 +37,7 @@ namespace Prefetcher {
 SMS::SMS(const SMSPrefetcherParams *p)
   : Queued(p), spatialRegionSize(p->spatial_region_size),
     spatialRegionSizeBits(floorLog2(p->spatial_region_size)),
-    reconstructionEntries(p->reconstruction_entries),
+    //reconstructionEntries(p->reconstruction_entries),
     activeGenerationTable(p->active_generation_table_assoc,
                           p->active_generation_table_entries,
                           p->active_generation_table_indexing_policy,
@@ -49,7 +49,7 @@ SMS::SMS(const SMSPrefetcherParams *p)
                          p->pattern_sequence_table_indexing_policy,
                          p->pattern_sequence_table_replacement_policy,
                          ActiveGenerationTableEntry(
-                             spatialRegionSize / blkSize)),
+                             spatialRegionSize / blkSize))
     //rmob(p->region_miss_order_buffer_entries)
 {
     fatal_if(!isPowerOf2(spatialRegionSize),
