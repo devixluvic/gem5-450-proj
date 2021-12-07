@@ -143,12 +143,14 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
     Addr sr_offset = (pfi.getAddr() % spatialRegionSize) / blkSize;
     DPRINTF(HWPrefetch, "Spatial Region offset: %#10X\n", sr_offset);
 
+    // Step 4: Fig 2 of Spatial Streaming Paper
     // Check if any active generation has ended
     checkForActiveGenerationsEnd();
 
     ActiveGenerationTableEntry *agt_entry =
         activeGenerationTable.findEntry(sr_addr, is_secure);
     if (agt_entry != nullptr) {
+        // Step3: Fig 2 of Spatial Streaming Paper
         // found an entry in the AGT, entry is currently being recorded,
         // add the offset
         activeGenerationTable.accessEntry(agt_entry);
@@ -156,30 +158,48 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
         lastTriggerCounter += 1;
     } else {
         // Not found, this is the first access (Trigger access)
-        // Step 1: Fig 2 of Spatial Streaming Paper - search filter table
-        ActiveGenerationTableEntry *ft_entry = filterTable.findEntry(sr_addr, is_secure);
 
-        if(ft_entry != nullptr){
-            //found an entry in filter table (spatial region is currently being access)
-            //filterTable.accessEntry
-        }
+        // Consult PST to predict which blk will be access
+        ActiveGenerationTableEntry *pst_entry = patternSequenceTable.findEntry(sr_addr, is_secure);
 
-        
+        if(pst_entry != nullptr){
+            // PST has a record
+            // move predicted pattern into cache
+            addresses.push_back(pst_entry);
+        } else {
+            // Step 1: Fig 2 of Spatial Streaming Paper - search filter table
+            ActiveGenerationTableEntry *ft_entry = filterTable.findEntry(sr_addr, is_secure);
 
+            if(ft_entry != nullptr){
+                // Step 2: Fig 2 of Spatial Streaming Paper
+                //found an entry in filter table (spatial region is currently being access)
+
+                // allocate a new AGT entry
+                agt_entry = activeGenerationTable.findVictim(sr_addr);
+                assert(agt_entry != nullptr);
+                activeGenerationTable.insertEntry(sr_addr, is_secure, agt_entry);
+                agt_entry->pc = pc;
+                agt_entry->paddress = paddr;
+                agt_entry->addOffset(sr_offset);
+            } else {
+                // alloocate a new FT entry
+                ft_entry = filterTable.findVictim(sr_addr);
+                assert(ft_entry != nullptr);
+                filterTable.insertEntry(sr_addr, is_secure, ft_entry);
+                ft_entry->pc = pc;
+                ft_entry->addOffset(sr_offset);
+            }
+        }              
+
+/*
         // Add entry to RMOB
         Addr pst_addr = (pc << spatialRegionSizeBits) + sr_offset;
         DPRINTF(HWPrefetch, "PST address added: %#10X\n", pst_addr);
         //addToRMOB(sr_addr, pst_addr, lastTriggerCounter);
         // Reset last trigger counter
         lastTriggerCounter = 0;
-
-        // allocate a new AGT entry
-        agt_entry = activeGenerationTable.findVictim(sr_addr);
-        assert(agt_entry != nullptr);
-        activeGenerationTable.insertEntry(sr_addr, is_secure, agt_entry);
-        agt_entry->pc = pc;
-        agt_entry->paddress = paddr;
-        agt_entry->addOffset(sr_offset);
+*/
+        
     }
     // increase the seq Counter for other entries
     //TODO: figure out why this for-loop is necessary
