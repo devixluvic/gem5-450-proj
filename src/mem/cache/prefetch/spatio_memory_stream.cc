@@ -156,6 +156,7 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
         activeGenerationTable.accessEntry(agt_entry);
         agt_entry->addOffset(sr_offset);
         lastTriggerCounter += 1;
+        DPRINTF(HWPrefetch, "Updated AGT entry with: %#10x\n", agt_entry->paddress);
     } else {
         // Not found, this is the first access (Trigger access)
 
@@ -165,7 +166,8 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
         if(pst_entry != nullptr){
             // PST has a record
             // move predicted pattern into cache
-            addresses.push_back(pst_entry);
+            DPRINTF(HWPrefetch, "SMS returns to cache: %#10X\n", pst_entry->paddress);
+            addresses.push_back(AddrPriority(pst_entry->paddress,0));
         } else {
             // Step 1: Fig 2 of Spatial Streaming Paper - search filter table
             ActiveGenerationTableEntry *ft_entry = filterTable.findEntry(sr_addr, is_secure);
@@ -175,12 +177,13 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
                 //found an entry in filter table (spatial region is currently being access)
 
                 // allocate a new AGT entry
-                agt_entry = activeGenerationTable.findVictim(sr_addr);
+                new_agt_entry = activeGenerationTable.findVictim(sr_addr);
                 assert(agt_entry != nullptr);
                 activeGenerationTable.insertEntry(sr_addr, is_secure, agt_entry);
-                agt_entry->pc = pc;
-                agt_entry->paddress = paddr;
-                agt_entry->addOffset(sr_offset);
+                new_agt_entry->pc = pc;
+                new_agt_entry->paddress = paddr;
+                new_agt_entry->addOffset(sr_offset);
+                DPRINTF(HWPrefetch, "Created AGT entry with: %#10x\n", new_agt_entry->paddress)
             } else {
                 // alloocate a new FT entry
                 ft_entry = filterTable.findVictim(sr_addr);
@@ -188,6 +191,7 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
                 filterTable.insertEntry(sr_addr, is_secure, ft_entry);
                 ft_entry->pc = pc;
                 ft_entry->addOffset(sr_offset);
+                DPRINTF(HWPrefetch, "Created FT entry with: %#10x\n", ft->paddress);
             }
         }              
 
