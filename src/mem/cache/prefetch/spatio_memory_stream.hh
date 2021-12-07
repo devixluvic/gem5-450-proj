@@ -146,6 +146,8 @@ class SMS : public Queued
         }
     };
 
+    /** Filter Table (FT) */
+    AssociativeSet<ActiveGenerationTableEntry> filterTable;
     /** Active Generation Table (AGT) */
     AssociativeSet<ActiveGenerationTableEntry> activeGenerationTable;
     /** Pattern Sequence Table (PST) */

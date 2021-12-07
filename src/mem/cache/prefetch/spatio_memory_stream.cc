@@ -38,6 +38,12 @@ SMS::SMS(const SMSPrefetcherParams *p)
   : Queued(p), spatialRegionSize(p->spatial_region_size),
     spatialRegionSizeBits(floorLog2(p->spatial_region_size)),
     //reconstructionEntries(p->reconstruction_entries),
+    filterTable           (p->active_generation_table_assoc,
+                          p->active_generation_table_entries,
+                          p->active_generation_table_indexing_policy,
+                          p->active_generation_table_replacement_policy,
+                          ActiveGenerationTableEntry(
+                              spatialRegionSize / blkSize)),
     activeGenerationTable(p->active_generation_table_assoc,
                           p->active_generation_table_entries,
                           p->active_generation_table_indexing_policy,
@@ -129,8 +135,13 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
     Addr sr_addr = pfi.getAddr() / spatialRegionSize;
     Addr paddr = pfi.getPaddr();
 
-    // Offset in cachelines within the spatial region
+    DPRINTF(HWPrefetch, "PC: %#10X\n", pc);
+    DPRINTF(HWPrefetch, "Spatial Region address: %#10X\n", sr_addr);
+    DPRINTF(HWPrefetch, "Spatial Region physical address: %#10X\n", paddr);
+
+    // Offset in cache-lines within the spatial region
     Addr sr_offset = (pfi.getAddr() % spatialRegionSize) / blkSize;
+    DPRINTF(HWPrefetch, "Spatial Region offset: %#10X\n", sr_offset);
 
     // Check if any active generation has ended
     checkForActiveGenerationsEnd();
@@ -145,9 +156,19 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
         lastTriggerCounter += 1;
     } else {
         // Not found, this is the first access (Trigger access)
+        // Step 1: Fig 2 of Spatial Streaming Paper - search filter table
+        ActiveGenerationTableEntry *ft_entry = filterTable.findEntry(sr_addr, is_secure);
+
+        if(ft_entry != nullptr){
+            //found an entry in filter table (spatial region is currently being access)
+            //filterTable.accessEntry
+        }
+
+        
 
         // Add entry to RMOB
         Addr pst_addr = (pc << spatialRegionSizeBits) + sr_offset;
+        DPRINTF(HWPrefetch, "PST address added: %#10X\n", pst_addr);
         //addToRMOB(sr_addr, pst_addr, lastTriggerCounter);
         // Reset last trigger counter
         lastTriggerCounter = 0;
@@ -161,6 +182,7 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
         agt_entry->addOffset(sr_offset);
     }
     // increase the seq Counter for other entries
+    //TODO: figure out why this for-loop is necessary
     for (auto &agt_e : activeGenerationTable) {
         if (agt_e.isValid() && agt_entry != &agt_e) {
             agt_e.seqCounter += 1;
@@ -168,7 +190,7 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
     }
 
     // Prefetch generation: if this is a miss, search for the most recent
-    // entry in the RMOB, and reconstruct the registered access sequence
+    // entry in the PST
     /*if (pfi.isCacheMiss()) {
         auto it = rmob.end();
         while (it != rmob.begin()) {
