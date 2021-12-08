@@ -177,13 +177,13 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
                 //found an entry in filter table (spatial region is currently being access)
 
                 // allocate a new AGT entry
-                new_agt_entry = activeGenerationTable.findVictim(sr_addr);
+                ActiveGenerationTableEntry *new_agt_entry = activeGenerationTable.findVictim(sr_addr);
                 assert(agt_entry != nullptr);
                 activeGenerationTable.insertEntry(sr_addr, is_secure, agt_entry);
                 new_agt_entry->pc = pc;
                 new_agt_entry->paddress = paddr;
                 new_agt_entry->addOffset(sr_offset);
-                DPRINTF(HWPrefetch, "Created AGT entry with: %#10x\n", new_agt_entry->paddress)
+                DPRINTF(HWPrefetch, "Created AGT entry with: %#10x\n", new_agt_entry->paddress);
             } else {
                 // alloocate a new FT entry
                 ft_entry = filterTable.findVictim(sr_addr);
@@ -191,7 +191,7 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
                 filterTable.insertEntry(sr_addr, is_secure, ft_entry);
                 ft_entry->pc = pc;
                 ft_entry->addOffset(sr_offset);
-                DPRINTF(HWPrefetch, "Created FT entry with: %#10x\n", ft->paddress);
+                DPRINTF(HWPrefetch, "Created FT entry with: %#10x\n", ft_entry->pc);
             }
         }              
 
