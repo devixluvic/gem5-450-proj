@@ -135,13 +135,13 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
     Addr sr_addr = pfi.getAddr() / spatialRegionSize;
     Addr paddr = pfi.getPaddr();
 
-    DPRINTF(HWPrefetch, "PC: %#10X\n", pc);
-    DPRINTF(HWPrefetch, "Spatial Region address: %#10X\n", sr_addr);
-    DPRINTF(HWPrefetch, "Spatial Region physical address: %#10X\n", paddr);
+    //DPRINTF(HWPrefetch, "PC: %#10X\n", pc);
+    //DPRINTF(HWPrefetch, "Spatial Region address: %#10X\n", sr_addr);
+    //DPRINTF(HWPrefetch, "Spatial Region physical address: %#10X\n", paddr);
 
     // Offset in cache-lines within the spatial region
     Addr sr_offset = (pfi.getAddr() % spatialRegionSize) / blkSize;
-    DPRINTF(HWPrefetch, "Spatial Region offset: %#10X\n", sr_offset);
+    //DPRINTF(HWPrefetch, "Spatial Region offset: %#10X\n", sr_offset);
 
     // Step 4: Fig 2 of Spatial Streaming Paper
     // Check if any active generation has ended
@@ -188,10 +188,17 @@ SMS::calculatePrefetch(const PrefetchInfo &pfi,
                 // alloocate a new FT entry
                 ft_entry = filterTable.findVictim(sr_addr);
                 assert(ft_entry != nullptr);
+                DPRINTF(HWPrefetch, "INSERTENTRY(): spatio_region: %#10X, pc: %#10x, physical addr: %#10x\n", sr_addr, pc, paddr);
                 filterTable.insertEntry(sr_addr, is_secure, ft_entry);
                 ft_entry->pc = pc;
                 ft_entry->addOffset(sr_offset);
                 DPRINTF(HWPrefetch, "Created FT entry with: %#10x\n", ft_entry->pc);
+                ActiveGenerationTableEntry *new_ft_entry = filterTable.findEntry(sr_addr, is_secure);
+                if(new_ft_entry != nullptr){
+                    DPRINTF(HWPrefetch, "CONGRATS: SUCCESS in inserting new FT entry found!!\n");
+                } else {
+                    DPRINTF(HWPrefetch, "FAILED: insertion of new FT failed\n");
+                }
             }
         }              
 
