@@ -27,6 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Import('*')
+DebugFlag('HWPretech')
 
 SimObject('Prefetcher.py')
 
@@ -44,5 +45,7 @@ Source('signature_path.cc')
 Source('signature_path_v2.cc')
 Source('slim_ampm.cc')
 Source('spatio_temporal_memory_streaming.cc')
+Source('spatio_memory_stream.cc')
 Source('stride.cc')
 Source('tagged.cc')
+

@@ -51,7 +51,7 @@ if __name__ == "__main__":
                                 os.getenv('M5_PATH')+'/build/X86/gem5.opt',
                                 'gem5-config/run_micro.py',
                                 'results/X86/run_micro/{}/{}/{}/{}/{}/'.format(bm,cpu,mem, dram_model, clockspeed),
-                                cpu,mem,os.path.join('microbenchmark',bm,'bench.X86'),dram_model, "--clock=" + clockspeed)
+                                cpu,mem,os.path.join('microbenchmark',bm,'bench.X86'),dram_model, "--clock=" + clockspeed, )
                             jobs.append(run)
 
     with mp.Pool(args.N) as pool:

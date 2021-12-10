@@ -123,6 +123,7 @@ class gem5Run:
 
         run.command = [
             str(run.gem5_binary),
+            '--debug-flags=HWPrefetch',
             '-re', f'--outdir={run.outdir}',
             str(run.run_script)]
         run.command += list(params)
