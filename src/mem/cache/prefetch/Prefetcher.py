@@ -487,6 +487,42 @@ class SMSPrefetcher(QueuedPrefetcher):
     #reconstruction_entries = Param.Unsigned(256,
         #"Number of reconstruction entries")
 
+class SMS_HMMPrefetcher(QueuedPrefetcher):
+    type = "SMS_HMMPrefetcher"
+    cxx_class = "Prefetcher::SMS_HMM"
+    cxx_header = "mem/cache/prefetch/spatio_memory_stream_HMM.hh"
+
+    spatial_region_size = Param.MemorySize("2kB",
+        "Memory covered by a hot zone")
+    active_generation_table_entries = Param.MemorySize("64",
+        "Number of entries in the active generation table")
+    active_generation_table_assoc = Param.Unsigned(64,
+        "Associativity of the active generation table")
+    active_generation_table_indexing_policy = Param.BaseIndexingPolicy(
+        SetAssociative(entry_size = 1,
+            assoc = Parent.active_generation_table_assoc,
+            size = Parent.active_generation_table_entries),
+        "Indexing policy of the active generation table")
+    active_generation_table_replacement_policy = Param.BaseReplacementPolicy(
+        LRURP(), "Replacement policy of the active generation table")
+
+    pattern_sequence_table_entries = Param.MemorySize("16384",
+        "Number of entries in the pattern sequence table")
+    pattern_sequence_table_assoc = Param.Unsigned(16384,
+        "Associativity of the pattern sequence table")
+    pattern_sequence_table_indexing_policy = Param.BaseIndexingPolicy(
+        SetAssociative(entry_size = 1,
+            assoc = Parent.pattern_sequence_table_assoc,
+            size = Parent.pattern_sequence_table_entries),
+        "Indexing policy of the pattern sequence table")
+    pattern_sequence_table_replacement_policy = Param.BaseReplacementPolicy(
+        LRURP(), "Replacement policy of the pattern sequence table")
+
+    #region_miss_order_buffer_entries = Param.Unsigned(131072,
+        #"Number of entries of the Region Miss Order Buffer")
+    #reconstruction_entries = Param.Unsigned(256,
+        #"Number of reconstruction entries")
+
 
 class STeMSPrefetcher(QueuedPrefetcher):
     type = "STeMSPrefetcher"

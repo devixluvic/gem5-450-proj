@@ -27,9 +27,9 @@
  */
 
  /**
-  * Implementation of the Spatio-Temporal Memory Streaming Prefetcher (SMS)
+  * Implementation of the SpatioMemory Streaming Prefetcher (SMS)
   * Reference:
-  *    Spatio-temporal memory streaming.
+  *    Spatio memory streaming.
   *    Somogyi, S., Wenisch, T. F., Ailamaki, A., & Falsafi, B. (2009).
   *    ACM SIGARCH Computer Architecture News, 37(3), 69-80.
   *
@@ -38,8 +38,8 @@
   *   is not implemented here, as this is handled by the QueuedPrefetcher class
   */
 
-#ifndef __MEM_CACHE_PREFETCH_SPATIO_MEMORY_STREAM_HH__
-#define __MEM_CACHE_PREFETCH_SPATIO_MEMORY_STREAM_HH__
+#ifndef __MEM_CACHE_PREFETCH_SPATIO_MEMORY_STREAM_HMM_HH__
+#define __MEM_CACHE_PREFETCH_SPATIO_MEMORY_STREAM_HMM_HH__
 
 #include <vector>
 
@@ -48,11 +48,11 @@
 #include "mem/cache/prefetch/associative_set.hh"
 #include "mem/cache/prefetch/queued.hh"
 
-struct SMSPrefetcherParams;
+struct SMS_HMMPrefetcherParams;
 
 namespace Prefetcher {
 
-class SMS : public Queued
+class SMS_HMM : public Queued
 {
     /** Size of each spatial region */
     const size_t spatialRegionSize;
@@ -195,8 +195,8 @@ class SMS : public Queued
     //     std::vector<AddrPriority> &addresses);
 
   public:
-    SMS(const SMSPrefetcherParams* p);
-    ~SMS() = default;
+    SMS_HMM(const SMS_HMMPrefetcherParams* p);
+    ~SMS_HMM() = default;
 
     void calculatePrefetch(const PrefetchInfo &pfi,
                            std::vector<AddrPriority> &addresses) override;
