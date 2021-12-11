@@ -42,6 +42,7 @@
 #define __MEM_CACHE_PREFETCH_SPATIO_MEMORY_STREAM_HMM_HH__
 
 #include <vector>
+#include <queue>
 
 #include "base/circular_queue.hh"
 #include "base/sat_counter.hh"
@@ -58,8 +59,8 @@ class SMS_HMM : public Queued
     const size_t spatialRegionSize;
     /** log_2 of the spatial region size */
     const size_t spatialRegionSizeBits;
-    /** Number of reconstruction entries */
-    //const unsigned int reconstructionEntries;
+    /** Previous Spatial Address */
+    Addr previous_spatial_region = 0;
 
     /**
      * Entry data type for the Active Generation Table (AGT) and the Pattern
@@ -152,47 +153,83 @@ class SMS_HMM : public Queued
     AssociativeSet<ActiveGenerationTableEntry> activeGenerationTable;
     /** Pattern Sequence Table (PST) */
     AssociativeSet<ActiveGenerationTableEntry> patternSequenceTable;
+    /**Markov Table is a vector pair of spatial region and its priority queue
+    - priority queue is made up of spatial region and its access counts
+    */
+    struct MarkovEntry{
+        Addr sp_region;
+        struct nextSpatialAccess{
+            Addr spatial_addr;
+            int access_count = 0;
 
-    // /** Data type of the Region Miss Order Buffer entry */
-    // struct RegionMissOrderBufferEntry {
-    //     /** Address of the spatial region */
-    //     Addr srAddress;
-    //     /**
-    //      * Address used to index the PST table, generated using the PC and the
-    //      * offset within the spatial region
-    //      */
-    //     Addr pstAddress;
-    //     /** Delta within the global miss order sequence */
-    //     unsigned int delta;
-    // };
+            nextSpatialAccess(Addr sp_add):spatial_addr(sp_add){}
+        };
+        std::vector<nextSpatialAccess> spatialAccesses;
 
-    // /** Region Miss Order Buffer (RMOB) */
-    // CircularQueue<RegionMissOrderBufferEntry> rmob;
+        static bool cmp(nextSpatialAccess &sp1, nextSpatialAccess &sp2){
+            return sp1.access_count > sp2.access_count;
+        }        
+
+        /** Update the access count if found*/
+        void findAccessANDupdate(Addr sp_add){
+            std::sort(spatialAccesses.begin(), spatialAccesses.end(), cmp);
+
+            for(int i = 0; i < spatialAccesses.size(); i++){
+                if(spatialAccesses[i].spatial_addr == sp_add){
+                    spatialAccesses[i].access_count+=1;
+                    break;
+                }
+            }
+        }
+
+        /** return the spatial address with the highest occurrence*/
+        Addr predictAddress(){
+            std::sort(spatialAccesses.begin(), spatialAccesses.end(), cmp);
+            return spatialAccesses[0].spatial_addr;
+        }
+        
+    };
+    
+    std::vector<MarkovEntry> markovTable;
+
+    /** Update the count of spatial region in Markov Table*/
+    void updateMarkovTable(Addr sp_add){
+        for(int i = 0; i < markovTable.size(); i++){
+            if(markovTable[i].sp_region == previous_spatial_region){
+                markovTable[i].findAccessANDupdate(sp_add);
+                break;   
+            }
+        }
+    }
+
+    /** return the predicted spatial region access*/
+    Addr predictSpatialAddress(){
+        Addr address = 0;
+        for(int i = 0; i < markovTable.size(); i++){
+            if(markovTable[i].sp_region == previous_spatial_region){
+                address = markovTable[i].predictAddress();
+                break;   
+            }
+        }
+        return address;
+    }
+
+    /** nullify victim entry*/
+    void markovTablefindVictim(Addr victim){
+        for(int i = 0; i < markovTable.size(); i++){
+            if(markovTable[i].sp_region == victim){
+                markovTable[i].sp_region = 0;
+                markovTable[i].spatialAccesses.clear();
+                break;   
+            }
+        }
+    }
 
     /** Counter to keep the count of accesses between trigger accesses */
     unsigned int lastTriggerCounter;
 
     /** Checks if the active generations have ended */
     void checkForActiveGenerationsEnd();
-
-    // /**
-    //  * Adds an entry to the RMOB
-    //  * @param sr_addr Spatial region address
-    //  * @param pst_addr Corresponding PST address
-    //  * @param delta Number of entries skipped in the global miss order
-    //  */
-    // void addToRMOB(Addr sr_addr, Addr pst_addr, unsigned int delta);
-
-    // /**
-    //  * Reconstructs a sequence of accesses and generates the prefetch
-    //  * addresses, adding them to the addresses vector
-    //  *
-    //  * @param rmob_it rmob position to start generating from.
-    //  * @param addresses vector to add the addresses to be prefetched
-    //  */
-    // void reconstructSequence(
-    //     CircularQueue<RegionMissOrderBufferEntry>::iterator rmob_it,
-    //     std::vector<AddrPriority> &addresses);
 
   public:
     SMS_HMM(const SMS_HMMPrefetcherParams* p);

@@ -109,17 +109,6 @@ SMS_HMM::checkForActiveGenerationsEnd()
     }
 }
 
-/*void
-SMS_HMM::addToRMOB(Addr sr_addr, Addr pst_addr, unsigned int delta)
-{
-    RegionMissOrderBufferEntry rmob_entry;
-    rmob_entry.srAddress = sr_addr;
-    rmob_entry.pstAddress = pst_addr;
-    rmob_entry.delta = delta;
-
-    rmob.push_back(rmob_entry);
-}*/
-
 void
 SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
                                    std::vector<AddrPriority> &addresses)
@@ -157,9 +146,13 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
         activeGenerationTable.accessEntry(agt_entry);
         agt_entry->addOffset(sr_offset);
         lastTriggerCounter += 1;
+        updateMarkovTable(sr_addr);
         //DPRINTF(HWPrefetch, "Updated AGT entry with: %#10x\n", agt_entry->paddress);
     } else {
         // Not found, this is the first access (Trigger access)
+
+        // Consult Markov Table to predict which spatial address will be used next
+        Addr sp_addr = predictSpatialAddress();
 
         // Consult PST to predict which blk will be access
         ActiveGenerationTableEntry *pst_entry = patternSequenceTable.findEntry(sr_addr, is_secure);
@@ -168,6 +161,8 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
             // PST has a record
             // move predicted pattern into cache
             //DPRINTF(HWPrefetch, "SMS returns to cache: %#10X\n", pst_entry->paddress);
+
+            //TODO: concatenate markov prediction with spatial pattern
             addresses.push_back(AddrPriority(pst_entry->paddress,0));
         } else {
             // Step 1: Fig 2 of Spatial Streaming Paper - search filter table
@@ -202,16 +197,7 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
                 }
             }
         }              
-
-/*
-        // Add entry to RMOB
-        Addr pst_addr = (pc << spatialRegionSizeBits) + sr_offset;
-        DPRINTF(HWPrefetch, "PST address added: %#10X\n", pst_addr);
-        //addToRMOB(sr_addr, pst_addr, lastTriggerCounter);
-        // Reset last trigger counter
-        lastTriggerCounter = 0;
-*/
-        
+       
     }
     // increase the seq Counter for other entries
     //TODO: figure out why this for-loop is necessary
@@ -221,19 +207,7 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
         }
     }
 
-    // Prefetch generation: if this is a miss, search for the most recent
-    // entry in the PST
-    /*if (pfi.isCacheMiss()) {
-        auto it = rmob.end();
-        while (it != rmob.begin()) {
-            --it;
-            if (it->srAddress == sr_addr) {
-                // reconstruct the access sequence
-                reconstructSequence(it, addresses);
-                break;
-            }
-        }
-    }*/
+    previous_spatial_region = sr_addr;
 }
 
 // void
