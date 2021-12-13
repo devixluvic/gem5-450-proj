@@ -487,6 +487,18 @@ class SMSPrefetcher(QueuedPrefetcher):
     #reconstruction_entries = Param.Unsigned(256,
         #"Number of reconstruction entries")
 
+# Implementation of Chen-Baer style strided prefetcher
+class ChenBaerPrefetcher(QueuedPrefetcher):
+    type = 'ChenBaerPrefetcher'
+    cxx_class = 'Prefetcher::ChenBaer'
+    cxx_header = "mem/cache/prefetch/chenBaerStream.hh"
+
+    on_inst = False
+
+    use_requestor_id = Param.Bool(True, "Use requestor id based history")
+
+    degree = Param.Int(2, "Number of prefetches to generate")
+
 
 class STeMSPrefetcher(QueuedPrefetcher):
     type = "STeMSPrefetcher"
