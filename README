@@ -39,3 +39,5 @@ Assuming we are starting in a freshly checked-out repo:
 
 The results are stored in the M5_PATH/results folder, with subfolders for varying system configurations (i.e. prefetcher used) and sorted by microbenchmark. Please note that while there are results checked in to the Git repo, they may have been generated from an older version of the prefetchers when we were still sorting out bugs - the best way to get results is to build and run from the dev branch.
 
+Note that the STREAM benchmark takes a long time - one "iteration" of STREAM takes about 3 hours inside of gem5 on my PC with a Ryzen 5 3600. Running on the SFU servers, with slower single-core performance, may take longer. Hopefully they can be run in parallel there!
+
