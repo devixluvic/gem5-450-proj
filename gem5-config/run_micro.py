@@ -161,6 +161,7 @@ parser.add_argument('binary', type = str, help = "Path to binary to run")
 # parser.add_argument('l1d_cachesize', type = str, help = "Level 1 Data cache size")
 # parser.add_argument('l2_cachesize', type = str, help = "Level 2 cache size")
 parser.add_argument('dram_model', type = str, help = "dram model to use in sim", default="DDR4_2400_16x4")
+parser.add_argument('prefetcher', type = str, help = "cache prefetcher to use in sim", default="StridePrefetcher")
 parser.add_argument("--clock", action="store",
                       default='1GHz',
                       help = """Top-level clock for blocks running at system
@@ -184,6 +185,7 @@ class MySystem(BaseTestSystem):
     _MemoryModel = valid_memories[args.memory_model]
     _Clk         = args.clock
     _DRAMModel = getDramModel()
+    _MyPrefetcher = args.prefetcher
     # _L1DCacheSize = args.l1d_cachesize
     # _L2CacheSize = args.l2_cachesize
 

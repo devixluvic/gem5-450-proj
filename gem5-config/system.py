@@ -41,6 +41,18 @@ from m5.objects import *
 from optparse import OptionParser
 from argparse import Namespace
 
+def getPrefetcher(MyPrefetcher):
+    if MyPrefetcher == "StridePrefetcher":
+        return StridePrefetcher()
+    if MyPrefetcher == "TaggedPrefetcher":
+        return TaggedPrefetcher()
+    if MyPrefetcher == "STeMSPrefetcher":
+        return STeMSPrefetcher()
+    if MyPrefetcher == "SMSPrefetcher":
+        return SMSPrefetcher()
+    if MyPrefetcher == "ChenBaerPrefetcher":
+        return ChenBaerPrefetcher()
+
 class InfMemory(SimpleMemory):
     latency = '0ns'
     bandwidth = '0B/s'
@@ -62,9 +74,9 @@ class L1Cache(Cache):
     response_latency = 1
     mshrs = 16
     tgts_per_mshr = 20
-    prefetcher = SMSPrefetcher()
+    prefetcher = TaggedPrefetcher()
 
-    def __init__(self,results = None):
+    def __init__(self, results = None):
         super(L1Cache, self).__init__()        
         pass
 
@@ -86,11 +98,12 @@ class L1ICache(L1Cache):
     def connectCPU(self, cpu):
         self.cpu_side = cpu.icache_port
         """Connect this cache's port to a CPU icache port"""
-    def __init__(self, results=None):
+    def __init__(self, inPrefetcher, results=None):
         super(L1ICache, self).__init__()
+        self.prefetcher = getPrefetcher(inPrefetcher)
         if not results:
             return
-        self.size = results    
+        self.size = results 
     
 class L1DCache(L1Cache):
     """Simple L1 data cache with default values"""
@@ -101,8 +114,9 @@ class L1DCache(L1Cache):
     def connectCPU(self, cpu):
         """Connect this cache's port to a CPU dcache port"""
         self.cpu_side = cpu.dcache_port
-    def __init__(self, results= None):
+    def __init__(self, inPrefetcher, results=None):
         super(L1DCache, self).__init__()
+        self.prefetcher = getPrefetcher(inPrefetcher)
         if not results:
             return
         self.size = results
@@ -123,7 +137,7 @@ class L2Cache(Cache):
 
     def connectMemSideBus(self, bus):
         self.mem_side = bus.slave
-    def __init__(self, results= None):
+    def __init__(self, prefetcher, results=None):
         super(L2Cache, self).__init__()
         if not results:
             return
@@ -141,6 +155,7 @@ class BaseTestSystem(System):
     _L1DCacheSize = "32kB"
     _L2CacheSize = "1MB"
     _DRAMModel = DDR4_2400_16x4()
+    _MyPrefetcher = "TaggedPrefetcher"
     #_L1ICacheSize = "32kB"
 
     def totalInsts(self):
@@ -158,12 +173,12 @@ class BaseTestSystem(System):
 
 
             self.cpu = self._CPUModel()
-            self.cpu.l1d = L1DCache(self._L1DCacheSize)
-            self.cpu.l1i = L1ICache()
+            self.cpu.l1d = L1DCache(self._MyPrefetcher, self._L1DCacheSize)
+            self.cpu.l1i = L1ICache(self._MyPrefetcher)
             self.l1_to_l2 = L2XBar(width=64)
 
             print("system.py: init L2 cache with size", self._L2CacheSize)
-            self.l2cache = L2Cache(self._L2CacheSize)
+            self.l2cache = L2Cache(self._MyPrefetcher, self._L2CacheSize)
             self.membus = SystemXBar(width=64)
 
             self.cpu.l1d.connectCPU(self.cpu)
