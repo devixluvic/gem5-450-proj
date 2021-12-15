@@ -46,6 +46,7 @@ Source('signature_path_v2.cc')
 Source('slim_ampm.cc')
 Source('spatio_temporal_memory_streaming.cc')
 Source('spatio_memory_stream.cc')
+Source('spatio_memory_stream_HMM.cc')
 Source('stride.cc')
 Source('tagged.cc')
 

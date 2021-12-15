@@ -1676,8 +1676,8 @@
                 },
                 "prefetch_on_access": false,
                 "prefetcher": {
-                    "type": "SMSPrefetcher",
-                    "cxx_class": "Prefetcher::SMS",
+                    "type": "SMS_HMMPrefetcher",
+                    "cxx_class": "Prefetcher::SMS_HMM",
                     "name": "prefetcher",
                     "path": "system.cpu.l1d.prefetcher",
                     "active_generation_table_assoc": 64,
@@ -1856,8 +1856,8 @@
                 },
                 "prefetch_on_access": false,
                 "prefetcher": {
-                    "type": "SMSPrefetcher",
-                    "cxx_class": "Prefetcher::SMS",
+                    "type": "SMS_HMMPrefetcher",
+                    "cxx_class": "Prefetcher::SMS_HMM",
                     "name": "prefetcher",
                     "path": "system.cpu.l1i.prefetcher",
                     "active_generation_table_assoc": 64,
