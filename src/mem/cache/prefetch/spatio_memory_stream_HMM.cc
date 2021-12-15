@@ -180,14 +180,25 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
                 new_agt_entry->paddress = paddr;
                 new_agt_entry->addOffset(sr_offset);
                 //DPRINTF(HWPrefetch, "Created AGT entry with: %#10x\n", new_agt_entry->paddress);
+
+                // Update Markov Table
+                updateMarkovTable(sr_addr);
+                
             } else {
-                // alloocate a new FT entry
+                // find victim in Filter Table and Markov Table
                 ft_entry = filterTable.findVictim(sr_addr);
                 assert(ft_entry != nullptr);
-                //DPRINTF(HWPrefetch, "INSERTENTRY(): spatio_region: %#10X, pc: %#10x, physical addr: %#10x\n", sr_addr, pc, paddr);
+
+                markovTablefindVictim(sr_addr);
+                
+                // alloocate a new FT entry
                 filterTable.insertEntry(sr_addr, is_secure, ft_entry);
                 ft_entry->pc = pc;
                 ft_entry->addOffset(sr_offset);
+
+                markovTableAddEntry(sr_addr);
+
+                //DPRINTF(HWPrefetch, "INSERTENTRY(): spatio_region: %#10X, pc: %#10x, physical addr: %#10x\n", sr_addr, pc, paddr);
                 //DPRINTF(HWPrefetch, "Created FT entry with: %#10x\n", ft_entry->pc);
                 ActiveGenerationTableEntry *new_ft_entry = filterTable.findEntry(sr_addr, is_secure);
                 if(new_ft_entry != nullptr){

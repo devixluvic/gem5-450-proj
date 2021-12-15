@@ -166,6 +166,8 @@ class SMS_HMM : public Queued
         };
         std::vector<nextSpatialAccess> spatialAccesses;
 
+        MarkovEntry(Addr entry_sp_region):sp_region(entry_sp_region){}
+
         static bool cmp(nextSpatialAccess &sp1, nextSpatialAccess &sp2){
             return sp1.access_count > sp2.access_count;
         }        
@@ -223,6 +225,10 @@ class SMS_HMM : public Queued
                 break;   
             }
         }
+    }
+
+    void markovTableAddEntry(Addr markovEntry){
+        markovTable.emplace_back(markovEntry);
     }
 
     /** Counter to keep the count of accesses between trigger accesses */
