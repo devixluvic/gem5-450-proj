@@ -99,7 +99,7 @@ class gem5Run:
                     run_script: str,
                     outdir: str,
                     *params: str,
-                    timeout: int = 60*15) -> 'gem5Run':
+                    timeout: int = 60*1000) -> 'gem5Run':
         """
         name is the name of the run. The name is not necessarily unique. The
         name could be used to query the results of the run.
@@ -123,7 +123,6 @@ class gem5Run:
 
         run.command = [
             str(run.gem5_binary),
-            '--debug-flags=HWPrefetch',
             '-re', f'--outdir={run.outdir}',
             str(run.run_script)]
         run.command += list(params)

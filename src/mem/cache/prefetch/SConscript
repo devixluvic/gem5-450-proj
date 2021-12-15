@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Import('*')
-DebugFlag('HWPretech')
+DebugFlag('HWPrefech')
 
 SimObject('Prefetcher.py')
 
@@ -49,4 +49,5 @@ Source('spatio_memory_stream.cc')
 Source('spatio_memory_stream_HMM.cc')
 Source('stride.cc')
 Source('tagged.cc')
+Source('chenBaerStream.cc')
 

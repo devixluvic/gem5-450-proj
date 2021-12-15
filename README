@@ -1,37 +1,45 @@
-This is the gem5 simulator.
+Gem5 repo, modified for CMPT 450 - group 3
+Our project is on cache prefetchers.
+The project repo is available at https://csil-git1.cs.surrey.sfu.ca/dlutz/gem5 
+The repo is a fork of the upstream Gem5 repository on Github, originally hosted at https://github.com/gem5/gem5
+On CSIL GitLab we are able to make it private, which was our reasoning for hosting it there.
 
-The main website can be found at http://www.gem5.org
+Our repo has a VSCode devcontainer configuration file set up for running in the VSCode remote container plugin, but it can also be built on any system with the requirements to build Gem5 from source. The CMPT 450 server used for assignment 1 has all the prerequisites, I believe.
 
-A good starting point is http://www.gem5.org/about, and for
-more information about building the simulator and getting started
-please see http://www.gem5.org/documentation and
-http://www.gem5.org/documentation/learning_gem5/introduction.
+All of our development took place on version 20.1.0.2. This was the version provided in class for assignment 1, and later versions (notably the main development version on the "stable" branch) had stability issues running microbenchmarks. There were no such stability issues on 20.1.0.2.
 
-To build gem5, you will need the following software: g++ or clang,
-Python (gem5 links in the Python interpreter), SCons, SWIG, zlib, m4,
-and lastly protobuf if you want trace capture and playback
-support. Please see http://www.gem5.org/documentation/general_docs/building
-for more details concerning the minimum versions of the aforementioned tools.
+Thusly, ALL OUR DEVELOPMENT/WORK IS ON THE "20.1.0.2_dev" BRANCH. It is NOT reflected on "stable", a remnant from the upstream gem5 repo we forked.
 
-Once you have all dependencies resolved, type 'scons
-build/<ARCH>/gem5.opt' where ARCH is one of ARM, NULL, MIPS, POWER, SPARC,
-or X86. This will build an optimized version of the gem5 binary (gem5.opt)
-for the the specified architecture. See
-http://www.gem5.org/documentation/general_docs/building for more details and
-options.
+Our source files can be found in $(REPO_BASE)/src/mem/cache/prefetch/ and are listed below:
+ - spatio_memory_stream.cc (SMS prefetcher, non-Markov)
+ - spatio_memory_stream.hh
+ - chenBaerStream.cc (Striding type prefetcher, baseline for result comparison)
+ - chenBaerStream.hh
+ - spatio_memory_stream_HMM.cc (SMS prefetcher, Markov version)
+ - spatio_memory_stream_HMM.hh 
 
-The basic source release includes these subdirectories:
-   - configs: example simulation configuration scripts
-   - ext: less-common external packages needed to build gem5
-   - src: source code of the gem5 simulator
-   - system: source for some optional system software for simulated systems
-   - tests: regression tests
-   - util: useful utility programs and files
+Note that the main interface for prefetching in gem5 is the "calculatePrefetch" function implemented in the .cc files listed above - that is the main place that the prefetcher algorithms reside within.
 
-To run full-system simulations, you will need compiled system firmware
-(console and PALcode for Alpha), kernel binaries and one or more disk
-images.
+The various Python classes, used to configure these prefetchers for use in system.py, are located in the same folder - just contained within the "Prefetcher.py" file.
 
-If you have questions, please send mail to gem5-users@gem5.org
 
-Enjoy using gem5 and please share your modifications and extensions.
+Building Gem5:
+
+These commands can be run in order to get a working copy of gem5 with our prefetchers added.
+Assuming we are starting in a freshly checked-out repo:
+
+ - git checkout 20.1.0.2_dev
+ - scons build/X86/gem5.opt -j 12 (subsitute 12 for the number of build threads to spawn)
+
+ ...aand wait! It'll take a fair amount of time to do the initial gem5 build. Later incremental builds are nicer.
+
+ Running Gem5:
+
+ We copied over the launch and system configuration scripts from assignment 1 and modified them slightly for this project. Instead of varying system configuration, we varied which cache prefetcher to use when running the microbenchmarks. Assuming you have followed the above steps to build gem5, to run the microbenchmarks with all the test prefetchers, one would run these commands (on the 20.1.0.2_dev branch, with built gem5 for X86):
+  - export M5_PATH=$PWD
+  - python3 launch.py 8 (substitue 8 for the number of gem5 instances to run in parallel)
+
+The results are stored in the M5_PATH/results folder, with subfolders for varying system configurations (i.e. prefetcher used) and sorted by microbenchmark. Please note that while there are results checked in to the Git repo, they may have been generated from an older version of the prefetchers when we were still sorting out bugs - the best way to get results is to build and run from the dev branch.
+
+Note that the STREAM benchmark takes a long time - one "iteration" of STREAM takes about 3 hours inside of gem5 on my PC with a Ryzen 5 3600. Running on the SFU servers, with slower single-core performance, may take longer. Hopefully they can be run in parallel there!
+

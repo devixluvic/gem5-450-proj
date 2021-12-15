@@ -22,14 +22,16 @@ if __name__ == "__main__":
 
     cpu_types = ['Minor4'] # 'Simple', 
     mem_types = ['Slow']
-    l1_cachesizes =  ["4kB"] # ,"8kB","32kB","64kB"
-    l2_cachesizes = ["128kB"] # "256kB", "512kB", "1MB"
+    l1_cachesizes =  ["32kB"] # ,"8kB","32kB","64kB"
+    l2_cachesizes = ["1MB"] # "256kB", "512kB", "1MB"
                         # for l2size in l2_cachesizes:
                         # for clockspeed in clockspeeds:
 
     clockspeeds = ["1GHz"] # , "2GHz"
 
     dram_models = ["DDR3_2133_8x8"]
+
+    prefetchers = ["StridePrefetcher", "TaggedPrefetcher", "STeMSPrefetcher", "SMSPrefetcher", "ChenBaerPrefetcher"] # SMSPrefetcher
 
     bm_list = []
 
@@ -38,7 +40,7 @@ if __name__ == "__main__":
 
     for filename in os.listdir('microbenchmark'):
         if os.path.isdir(f'microbenchmark/{filename}') and filename != '.git':
-            bm_list.append(filename)
+                bm_list.append(filename)
 
     jobs = []
     for bm in bm_list:
@@ -46,12 +48,13 @@ if __name__ == "__main__":
             for mem in mem_types:
                 for clockspeed in clockspeeds:
                     for dram_model in dram_models:
+                        for prefetcher in prefetchers:
                             run = gem5Run.createSERun(
                                 'microbench_tests',
                                 os.getenv('M5_PATH')+'/build/X86/gem5.opt',
                                 'gem5-config/run_micro.py',
-                                'results/X86/run_micro/{}/{}/{}/{}/{}/'.format(bm,cpu,mem, dram_model, clockspeed),
-                                cpu,mem,os.path.join('microbenchmark',bm,'bench.X86'),dram_model, "--clock=" + clockspeed, )
+                                'results/X86/run_micro/{}/{}/{}/{}/{}/{}/'.format(bm,cpu,mem, dram_model, clockspeed, prefetcher),
+                                cpu,mem,os.path.join('microbenchmark',bm,'bench.X86'),dram_model, prefetcher, "--clock=" + clockspeed, )
                             jobs.append(run)
 
     with mp.Pool(args.N) as pool:
