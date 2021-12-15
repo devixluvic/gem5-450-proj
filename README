@@ -18,6 +18,8 @@ Our source files can be found in $(REPO_BASE)/src/mem/cache/prefetch/ and are li
  - spatio_memory_stream_HMM.cc (SMS prefetcher, Markov version)
  - spatio_memory_stream_HMM.hh 
 
+Note that the main interface for prefetching in gem5 is the "calculatePrefetch" function implemented in the .cc files listed above - that is the main place that the prefetcher algorithms reside within.
+
 The various Python classes, used to configure these prefetchers for use in system.py, are located in the same folder - just contained within the "Prefetcher.py" file.
 
 

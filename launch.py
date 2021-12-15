@@ -40,7 +40,6 @@ if __name__ == "__main__":
 
     for filename in os.listdir('microbenchmark'):
         if os.path.isdir(f'microbenchmark/{filename}') and filename != '.git':
-            if filename != "STREAM":
                 bm_list.append(filename)
 
     jobs = []
