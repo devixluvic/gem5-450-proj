@@ -117,7 +117,7 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
         DPRINTF(HWPrefetch, "Ignoring request with no PC.\n");
         return;
     }
-    DPRINTF(HWPrefetch, "Hello World from HMM model\n");
+    //DPRINTF(HWPrefetch, "Hello World from HMM model\n");
 
     Addr pc = pfi.getPC();
     bool is_secure = pfi.isSecure();
@@ -151,9 +151,6 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
     } else {
         // Not found, this is the first access (Trigger access)
 
-        // Consult Markov Table to predict which spatial address will be used next
-        Addr sp_addr = predictSpatialAddress();
-
         // Consult PST to predict which blk will be access
         ActiveGenerationTableEntry *pst_entry = patternSequenceTable.findEntry(sr_addr, is_secure);
 
@@ -163,7 +160,13 @@ SMS_HMM::calculatePrefetch(const PrefetchInfo &pfi,
             //DPRINTF(HWPrefetch, "SMS returns to cache: %#10X\n", pst_entry->paddress);
 
             //TODO: concatenate markov prediction with spatial pattern
-            addresses.push_back(AddrPriority(pst_entry->paddress,0));
+            // Consult Markov Table to predict which spatial address will be used next
+            Addr hmm_result = markoveTablePredictSpatialAddress();
+            // Addr hmm_result_pAddr = (pc << spatialRegionSizeBits) + sr_offset;
+            // Addr prefetch_addr = hmm_result_pAddr+ pst_entry->sequence;
+            // DPRINTF(HWPrefetch, "HMM predicts spatial region: %#10x\n", hmm_result);
+            // DPRINTF(HWPrefetch, "HMM predicts: %#10x\n", prefetch_addr);
+            addresses.push_back(AddrPriority(hmm_result,0));
         } else {
             // Step 1: Fig 2 of Spatial Streaming Paper - search filter table
             ActiveGenerationTableEntry *ft_entry = filterTable.findEntry(sr_addr, is_secure);

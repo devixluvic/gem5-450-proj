@@ -173,15 +173,16 @@ class SMS_HMM : public Queued
         }        
 
         /** Update the access count if found*/
-        void findAccessANDupdate(Addr sp_add){
-            std::sort(spatialAccesses.begin(), spatialAccesses.end(), cmp);
-
+        void findAccessANDupdate(Addr sp_add){            
+            // find the spatial region then update count
             for(int i = 0; i < spatialAccesses.size(); i++){
                 if(spatialAccesses[i].spatial_addr == sp_add){
                     spatialAccesses[i].access_count+=1;
                     break;
                 }
             }
+            // sort the spatial accessess vector to ensure highest access is at the beginning
+            std::sort(spatialAccesses.begin(), spatialAccesses.end(), cmp);
         }
 
         /** return the spatial address with the highest occurrence*/
@@ -205,7 +206,7 @@ class SMS_HMM : public Queued
     }
 
     /** return the predicted spatial region access*/
-    Addr predictSpatialAddress(){
+    Addr markoveTablePredictSpatialAddress(){
         Addr address = 0;
         for(int i = 0; i < markovTable.size(); i++){
             if(markovTable[i].sp_region == previous_spatial_region){
