@@ -1,0 +1,1 @@
+STREAM benchmark taken from http://www.cs.virginia.edu/stream/ref.html
